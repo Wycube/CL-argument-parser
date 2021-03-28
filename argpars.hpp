@@ -40,7 +40,7 @@ namespace ap {
 		std::string m_long_name;    //Long names are preceded by two hyphens("--"), ex. --help
 		std::string m_short_name;   //Short names are preceded by only one hyphen("-"), -h but can be more than one letter
 		std::string m_help_message; //The help message to be displayed for this option
-		bool m_has_param;           //Determines if the option has a parameter after it, ex. --number 12 <--parameter
+		bool m_has_param;           //Determines if the option has a parameter after it, ex. --number 12 <-- parameter
 		
 	public:
 	
@@ -70,9 +70,9 @@ namespace ap {
 	
 		Builder() { }
 		Builder& sname(const std::string &short_name) { m_option.m_short_name = short_name; return *this; }
-		Builder& lname(const std::string &long_name)  { m_option.m_long_name = long_name; return *this;   }
-		Builder& help(const std::string &message)     { m_option.m_help_message = message; return *this;  }
-		Builder& param()         			          { m_option.m_has_param = true; return *this;        }
+		Builder& lname(const std::string &long_name)  { m_option.m_long_name = long_name;   return *this; }
+		Builder& help(const std::string &message)     { m_option.m_help_message = message;  return *this; }
+		Builder& param()                              { m_option.m_has_param = true;        return *this; }
 		Option build()                                { return m_option; } //Return the Option with variables set 
 	};
 	
@@ -102,6 +102,8 @@ namespace ap {
 		std::string usage_message(const std::string &name, const std::string &usage, uint32_t option_width = 20) const;
 		void parse_args(int argc, char *argv[]);
 	};
+	
+#ifdef ARGPARS_IMPLEMENTATION
 	
 	//--------------- METHODS ---------------//
 	
@@ -250,6 +252,8 @@ namespace ap {
 		if(need_param)
 			errors.push_back("No Parameter Provided For Last Option");
 	}
+	
+#endif //ARGPARS_IMPLEMENTATION
 	
 } //namespace ap
 
