@@ -93,9 +93,11 @@ namespace ap {
 		Option get_option(size_t index) const;
 		Option get_option(const std::string &name) const;	
 		std::string get_param(const std::string &name) const;
-		std::string get_param(const Option &option) const;	
+		std::string get_param(const Option &option) const;
+		std::string get_param_any(const std::string &name) const;
 		bool is_set(const std::string &name) const;
-		bool is_set(const Option &option) const;	
+		bool is_set(const Option &option) const;
+		bool is_set_any(const std::string &name) const;
 		
 		bool is_error() const;
 		
@@ -132,13 +134,16 @@ namespace ap {
 				return p.second;
 		
 		return "";
-	}	
+	}
 	std::string Options::get_param(const Option &option) const {
 		for(auto const &p : m_results)
 			if(option.short_name() == p.first || option.long_name() == p.first)
 				return p.second;
 		
 		return "";
+	}
+	std::string Options::get_param(const std::string &name) const {
+		return get_param(get_option(name));
 	}
 	
 	bool Options::is_set(const std::string &name) const {
@@ -154,6 +159,9 @@ namespace ap {
 				return true;
 		
 		return false;
+	}
+	bool Options::is_set(const std::string &name) const {
+		return is_set(get_option(name));
 	}
 	
 	bool Options::is_error() const {
@@ -226,11 +234,12 @@ namespace ap {
 						passed = true;
 					}
 					
-					if(passed && op.has_param())
-						need_param = true;
-					
-					if(passed)
-						valid = true;
+					if(passed && op.has_param()) {
+                        valid = true;
+                        
+                        if(op.has_param())
+                    	    need_param = true;
+                    }
 				}
 				
 				if(!valid) {
