@@ -1,13 +1,6 @@
 #ifndef ARGPARS_HPP
 #define ARGPARS_HPP
 
-#include <tuple>
-#include <string>
-#include <string_view>
-#include <vector>
-#include <sstream>
-#include <iomanip>
-
 /* ArgPars, a single-header simple command line argument parser
  *
  * Copyright (c) 2020 Wycube
@@ -30,6 +23,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+ 
+#include <tuple>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <iomanip>
+
+//Compilers that don't support string_view will just use std::string
+#if __cplusplus >= 201703L
+	#include <string_view>
+	#define AP_STRING std::string_view
+#else
+	#define AP_STRING std::string
+#endif
  
  
 namespace ap {
@@ -73,12 +80,12 @@ namespace ap {
 	public:
 	
 		Builder() { }
-		Builder& sname(const std::string_view &short_name) { m_option.m_short_name = short_name; return *this; }
-		Builder& lname(const std::string_view &long_name)  { m_option.m_long_name = long_name;   return *this; }
-		Builder& help(const std::string_view &message)     { m_option.m_help_message = message;  return *this; }
-		Builder& param()                                   { m_option.m_has_param = true;        return *this; }
-		Builder& def_param(const std::string_view &param)  { m_option.m_default_param = param;   return *this; }
-		Option build()                                     { return m_option; } //Return the Option with variables set 
+		Builder& sname(const AP_STRING &short_name) { m_option.m_short_name = short_name; return *this; }
+		Builder& lname(const AP_STRING &long_name)  { m_option.m_long_name = long_name;   return *this; }
+		Builder& help(const AP_STRING &message)     { m_option.m_help_message = message;  return *this; }
+		Builder& param()                            { m_option.m_has_param = true;        return *this; }
+		Builder& def_param(const AP_STRING &param)  { m_option.m_default_param = param;   return *this; }
+		Option build()                              { return m_option; } //Return the Option with variables set 
 	};
 	
 	struct Options {
@@ -96,17 +103,17 @@ namespace ap {
 		
 		void add_option(Option option);	
 		Option get_option(size_t index) const;
-		Option get_option(const std::string_view &name) const;	
-		std::string_view get_param(const std::string_view &name) const;
-		std::string_view get_param(const Option &option) const;
-		std::string_view get_param_any(const std::string_view &name) const;
-		bool is_set(const std::string_view &name) const;
+		Option get_option(const AP_STRING &name) const;	
+		AP_STRING get_param(const AP_STRING &name) const;
+		AP_STRING get_param(const Option &option) const;
+		AP_STRING get_param_any(const AP_STRING &name) const;
+		bool is_set(const AP_STRING &name) const;
 		bool is_set(const Option &option) const;
-		bool is_set_any(const std::string_view &name) const;
+		bool is_set_any(const AP_STRING &name) const;
 		
 		bool is_error() const;
 		
-		std::string usage_message(const std::string_view &name, const std::string_view &usage, uint32_t option_width = 20) const;
+		std::string usage_message(const AP_STRING &name, const AP_STRING &usage, uint32_t option_width = 20) const;
 		void parse_args(int argc, char *argv[]);
 	};
 	
@@ -122,7 +129,7 @@ namespace ap {
 	}
 	
 	Option Options::get_option(size_t index) const { return m_options.at(index); }
-	Option Options::get_option(const std::string_view &name) const {
+	Option Options::get_option(const AP_STRING &name) const {
 		for(size_t i = 0; i < num_options(); i++) {
 			const Option &op = m_options.at(i);
 			
@@ -133,25 +140,25 @@ namespace ap {
 		return Option();
 	}
 	
-	std::string_view Options::get_param(const std::string_view &name) const {
+	AP_STRING Options::get_param(const AP_STRING &name) const {
 		for(auto const &p : m_results)
 			if(name == p.first)
 				return p.second;
 		
 		return "";
 	}
-	std::string_view Options::get_param(const Option &option) const {
+	AP_STRING Options::get_param(const Option &option) const {
 		for(auto const &p : m_results)
 			if(option.short_name() == p.first || option.long_name() == p.first)
 				return p.second;
 		
 		return "";
 	}
-	std::string_view Options::get_param_any(const std::string_view &name) const {
+	AP_STRING Options::get_param_any(const AP_STRING &name) const {
 		return get_param(get_option(name));
 	}
 	
-	bool Options::is_set(const std::string_view &name) const {
+	bool Options::is_set(const AP_STRING &name) const {
 		for(auto const &p : m_results)
 			if(name == p.first)
 				return true;
@@ -165,7 +172,7 @@ namespace ap {
 		
 		return false;
 	}
-	bool Options::is_set_any(const std::string_view &name) const {
+	bool Options::is_set_any(const AP_STRING &name) const {
 		return is_set(get_option(name));
 	}
 	
@@ -173,9 +180,9 @@ namespace ap {
 		return !errors.empty();
 	}
 	
-	std::string Options::usage_message(const std::string_view &name, const std::string_view &usage, uint32_t option_width) const {
+	std::string Options::usage_message(const AP_STRING &name, const AP_STRING &usage, uint32_t option_width) const {
 		std::stringstream message;
-		std::string_view spacer = "  ", short_prefix = "-", long_prefix = "--";
+		AP_STRING spacer = "  ", short_prefix = "-", long_prefix = "--";
 		
 		message << "Usage: " << name << " " << usage << "\n\n";
 		message << "Options:\n";
@@ -216,11 +223,11 @@ namespace ap {
 		this->errors.clear(); //Reset error
 		
 		for(size_t i = 1; i < argc; i++) {
-			std::string_view argument = argv[i];
+			AP_STRING argument = argv[i];
 			
 			//Check for "-" prefix
 			if(!need_param && argument.size() >= 2 && argument[0] == '-') {
-				std::string_view argument_name = argument.substr(1);
+				AP_STRING argument_name = argument.substr(1);
 				
 				bool valid = false;
 				//Check if the name matches any options
