@@ -29,7 +29,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+ 
+ 
 namespace ap {
 	
 	//--------------- STRUCTS ---------------//
@@ -37,10 +38,11 @@ namespace ap {
 	struct Option {
 	private:
 	
-		std::string m_long_name;    //Long names are preceded by two hyphens("--"), ex. --help
-		std::string m_short_name;   //Short names are preceded by only one hyphen("-"), -h but can be more than one letter
-		std::string m_help_message; //The help message to be displayed for this option
-		bool m_has_param;           //Determines if the option has a parameter after it, ex. --number 12 <-- parameter
+		std::string m_long_name;     //Long names are preceded by two hyphens("--"), ex. --help
+		std::string m_short_name;    //Short names are preceded by only one hyphen("-"), -h but can be more than one letter
+		std::string m_help_message;  //The help message to be displayed for this option
+		std::string m_default_param; //The default parameter for the option when none is provided
+		bool m_has_param;            //Determines if the option has a parameter after it, ex. --number 12 <-- parameter
 		
 	public:
 	
@@ -53,10 +55,11 @@ namespace ap {
 			this->m_has_param    = other.m_has_param;
 		}
 		
-		std::string long_name()    const { return m_long_name;    }
-		std::string short_name()   const { return m_short_name;   }
-		std::string help_message() const { return m_help_message; }
-		bool has_param()           const { return m_has_param;    }
+		std::string long_name()     const { return m_long_name;     }
+		std::string short_name()    const { return m_short_name;    }
+		std::string help_message()  const { return m_help_message;  }
+		std::string default_param() const { return m_default_param; }
+		bool has_param()            const { return m_has_param;     }
 		
 		friend class Builder;
 	};
@@ -73,6 +76,7 @@ namespace ap {
 		Builder& lname(const std::string &long_name)  { m_option.m_long_name = long_name;   return *this; }
 		Builder& help(const std::string &message)     { m_option.m_help_message = message;  return *this; }
 		Builder& param()                              { m_option.m_has_param = true;        return *this; }
+		Builder& def_param(const std::string &param)  { m_option.m_default_param = param;   return *this; }
 		Option build()                                { return m_option; } //Return the Option with variables set 
 	};
 	
@@ -142,7 +146,7 @@ namespace ap {
 		
 		return "";
 	}
-	std::string Options::get_param(const std::string &name) const {
+	std::string Options::get_param_any(const std::string &name) const {
 		return get_param(get_option(name));
 	}
 	
@@ -160,7 +164,7 @@ namespace ap {
 		
 		return false;
 	}
-	bool Options::is_set(const std::string &name) const {
+	bool Options::is_set_any(const std::string &name) const {
 		return is_set(get_option(name));
 	}
 	
@@ -226,11 +230,11 @@ namespace ap {
 					long_name += op.long_name();
 					
 					if(argument_name == op.short_name()) {
-						this->m_results.push_back({op.short_name(), ""});
+						this->m_results.push_back({op.short_name(), op.has_param() ? op.default_param() : ""});
 						passed = true;
 					}
 					if(argument_name == long_name) {
-						this->m_results.push_back({op.long_name(), ""});
+						this->m_results.push_back({op.long_name(), op.has_param() ? op.default_param() : ""});
 						passed = true;
 					}
 					
