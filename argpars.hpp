@@ -176,8 +176,8 @@ namespace ap {
 		std::stringstream message;
 		std::string spacer = "  ", short_prefix = "-", long_prefix = "--";
 		
-		message << "USAGE: " << name << " " << usage << "\n\n";
-		message << "OPTIONS:\n";
+		message << "Usage: " << name << " " << usage << "\n\n";
+		message << "Options:\n";
 		
 		//Add options
 		for(const auto &op : m_options) {
