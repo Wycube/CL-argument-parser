@@ -3,7 +3,7 @@
 
 /* ArgPars, a single-header simple command line argument parser
  *
- * Copyright (c) 2020 Wycube
+ * Copyright (c) 2020 Spencer Burton
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -104,9 +104,9 @@ namespace ap {
 		void add_option(Option option);	
 		Option get_option(size_t index) const;
 		Option get_option(const AP_STRING &name) const;	
-		AP_STRING get_param(const AP_STRING &name) const;
-		AP_STRING get_param(const Option &option) const;
-		AP_STRING get_param_any(const AP_STRING &name) const;
+		std::string get_param(const AP_STRING &name) const;
+		std::string get_param(const Option &option) const;
+		std::string get_param_any(const AP_STRING &name) const;
 		bool is_set(const AP_STRING &name) const;
 		bool is_set(const Option &option) const;
 		bool is_set_any(const AP_STRING &name) const;
@@ -140,21 +140,21 @@ namespace ap {
 		return Option();
 	}
 	
-	AP_STRING Options::get_param(const AP_STRING &name) const {
+	std::string Options::get_param(const AP_STRING &name) const {
 		for(auto const &p : m_results)
 			if(name == p.first)
 				return p.second;
 		
 		return "";
 	}
-	AP_STRING Options::get_param(const Option &option) const {
+	std::string Options::get_param(const Option &option) const {
 		for(auto const &p : m_results)
 			if(option.short_name() == p.first || option.long_name() == p.first)
 				return p.second;
 		
 		return "";
 	}
-	AP_STRING Options::get_param_any(const AP_STRING &name) const {
+	std::string Options::get_param_any(const AP_STRING &name) const {
 		return get_param(get_option(name));
 	}
 	
