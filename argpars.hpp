@@ -200,7 +200,7 @@ namespace ap {
 				temp << " <param>";
 			
 			if(op.help_message() != "") {
-				uint32_t width = temp.str().size();
+				size_t width = temp.str().size();
 				
 				if(width >= option_width) {
 					temp << "\n";
