@@ -3,7 +3,7 @@
 
 /* ArgPars, a single-header simple command line argument parser
  *
- * Copyright (c) 2020 Spencer Burton
+ * Copyright (c) 2020 Wycube
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
